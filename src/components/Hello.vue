@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
+    <h1>{{ newMsg }}</h1>
     <h2>Essential Links</h2>
     <ul>
       <li><a href="https://vuejs.org" target="_blank">Core Docs</a></li>
@@ -25,14 +25,27 @@ export default {
   name: 'hello',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      msg: this.$store.state.test.content
     }
+  },
+  computed: {
+    newMsg() {
+      return this.$store.state.test.content
+    }
+  },
+  mounted() {
+    setTimeout(function() {
+      this.$store.dispatch('testAction', {
+        newContent: 'CAO'
+      });
+    }.bind(this), 2000);
+    
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style lang="scss" scoped>
 h1, h2 {
   font-weight: normal;
 }
@@ -45,9 +58,13 @@ ul {
 li {
   display: inline-block;
   margin: 0 .134rem;
+
+  a {
+    color: #000;
+  }
 }
 
-a {
+/*a {
   color: #42b983;
-}
+}*/
 </style>
