@@ -1,15 +1,27 @@
 <template>
-	<div class="loading-container">
+	<div class="loading-container" v-show="loadingShow">
 		<div class="loading-wrap">
 			<i class="loading-icon"></i>
-			<span class="loading-text">正在登录</span>
+			<span class="loading-text"> {{loadingMsg}} </span>
 		</div>
 	</div>
 </template>
 
 <script>
 	export default {
-		name: 'Loading'
+		name: 'Loading',
+		computed: {
+			loadingMsg() {
+				return this.$store.state.loading.msg;
+			},
+			loadingShow() {
+				if(this.$store.state.loading.status === 'hidden') {
+					return false;
+				}
+
+				return true;
+			}
+		}
 	}
 </script>
 
