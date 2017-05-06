@@ -57,7 +57,7 @@
 				background-position: center center;
 				background-repeat: no-repeat;
 				background-size: cover;
-				animation: loading 1s ease infinite;
+				animation: loading .6s ease infinite;
 			}
 
 			.loading-text {

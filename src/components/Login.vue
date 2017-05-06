@@ -1,7 +1,7 @@
 <template>
 	<div class="login-container">
 		<div class="login-btn-wrap">
-			<span class="login-way" @touchend="login"> {{qqLogin}} </span>
+			<span class="login-way" :value="qqLogin" @touchend="login"> {{qqLogin}} </span>
 		</div>
 	</div>
 </template>
@@ -20,13 +20,14 @@
 				this.$store.dispatch(LOADING_STATUS_ACTION, {status: 'show'});
 				setTimeout(() => {
 					this.$store.dispatch(LOADING_STATUS_ACTION, {status: 'hidden'});
+					this.$router.push('/index');
 				}, 3000);
 			}
 		}
 	}
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 	.login-container {
 		width: 100%;
 		height: 100%;
