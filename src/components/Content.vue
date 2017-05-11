@@ -1,7 +1,7 @@
 <template>
 	<div class="content-container">
 		<div class="fresh-loading">
-			<i></i>
+			<i ref="loading"></i>
 			<span class="text"> {{freshText}} </span>
 		</div>
 		
@@ -69,8 +69,16 @@
 				let cp = {x: e.touches[0].pageX, y: e.touches[0].pageY};
 				let carouselWrap = this.$refs.carouselWrap;
 				let content = this.$refs.content;
+				let loading = this.$refs.loading;
 				if(this.isScroll) {
-					this.offset += cp.y - this.startPoint.y;
+					if(cp.y > this.startPoint.y && this.offset > 0) {
+						this.offset += (cp.y - this.startPoint.y) * 0.3;
+						if(this.offset >= loading.parentNode.offsetHeight/2) {
+							this.freshText = '释放更新';
+						}
+					} else {
+						this.offset += cp.y - this.startPoint.y;
+					}
 
 					if(this.offset < 0 && Math.abs(this.offset) > this.maxOffset) {
 						this.offset = -this.maxOffset;
@@ -93,8 +101,12 @@
 						}
 
 					} else if(this.offset >= 0) {
-						carouselWrap.style.transform = 'translate3d(0, 0, 0)';
-						content.style.transform = 'translate3d(0, 0, 0)';
+						// carouselWrap.style.transform = 'translate3d(0, 0, 0)';
+						// content.style.transform = 'translate3d(0, 0, 0)';
+						loading.style.animationPlayState = 'paused';
+						carouselWrap.style.transform = 'translate3d(0, ' + this.offset + 'px, 0)';
+						content.style.transform = 'translate3d(0, ' + this.offset + 'px, 0)';
+						loading.parentNode.style.transform = 'translate3d(0, ' + this.offset + 'px, 0)';
 					} else {
 						//header.style.top = this.offset + 'px';
 						carouselWrap.style.transform = 'translate3d(0, ' + this.offset + 'px, 0)';
@@ -107,6 +119,24 @@
 
 			contentTouchEnd(e) {
 				this.isScroll = false;
+
+				if(this.offset > 0) {
+					let carouselWrap = this.$refs.carouselWrap;
+					let content = this.$refs.content;
+					let loading = this.$refs.loading;
+					loading.style.animationPlayState = 'running';
+					carouselWrap.style.transform = 'translate3d(0, 1.4rem, 0)';
+					content.style.transform = 'translate3d(0, 1.4rem, 0)';
+					loading.parentNode.style.transform = 'translate3d(0, 1.4rem, 0)';
+
+					setTimeout(() => {
+						this.freshText = '下拉更新';
+						loading.parentNode.style.transform = 'translate3d(0, 0, 0)';
+						loading.style.animationPlayState = 'paused';
+						carouselWrap.style.transform = 'translate3d(0, 0, 0)';
+						content.style.transform = 'translate3d(0, 0, 0)';
+					}, 2000);
+				}
 			}
 		}
 	}
@@ -114,6 +144,7 @@
 
 <style lang="scss" scoped>
 	.content-container {
+		box-sizing: border-box;
 		width: 100%;
 		min-height: 100%;
 		overflow: hidden;
@@ -124,9 +155,25 @@
 
 		.fresh-loading {
 			position: absolute;
-			top: -1rem;
+			top: -1.4rem;
 			width: 100%;
-			height: 1rem;
+			height: 1.4rem;
+			text-align: center;
+			color: #bbb;
+
+			i {
+				display: block;
+				margin: 0 auto;
+				width: .72rem;
+				height: .83rem;
+				animation: updateAnimation .6s step-end infinite;
+			}
+
+			.text {
+				display: inline-block;
+				margin-top: 10px;
+				font-size: 24px;
+			}
 		}
 
 		.content-wrap {
@@ -173,5 +220,16 @@
 			height: 1.6rem;
 			background-color: green;
 		}
+	}
+
+	@keyframes updateAnimation {
+		0% { background-image: url('../assets/images/loading/teemo_1.png'); }
+		12.5% { background-image: url('../assets/images/loading/teemo_2.png'); }
+		25% { background-image: url('../assets/images/loading/teemo_3.png'); }
+		37.5% { background-image: url('../assets/images/loading/teemo_4.png'); }
+		50% { background-image: url('../assets/images/loading/teemo_5.png'); }
+		62.5% { background-image: url('../assets/images/loading/teemo_6.png'); }
+		85% { background-image: url('../assets/images/loading/teemo_7.png'); }
+		100% { background-image: url('../assets/images/loading/teemo_8.png'); }
 	}
 </style>
