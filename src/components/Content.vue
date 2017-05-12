@@ -25,11 +25,13 @@
 
 		data() {
 			return {
+				cache: {},
 				freshText: '下拉更新',
 				startPoint: {x: 0, y: 0},
 				offset: 0,
 				maxOffset: 0,
 				isScroll: false,
+				pollTimer: 0,
 				list: [{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'}]
 			}
 		},
@@ -37,19 +39,31 @@
 		mounted() {
 			let content = this.$refs.content;
 			let navga = this.$refs.navga;
-			let list = content.querySelectorAll('.item');
+			let carouselWrap = this.$refs.carouselWrap;
+			let loading = this.$refs.loading;
+			this.cache['content'] = content;
+			this.cache['navga'] = navga;
+			this.cache['carouselWrap'] = carouselWrap;
+			this.cache['loading'] = loading;
+			this.cache['carouselWrapOffsetHeight'] = carouselWrap.offsetHeight;
+			this.cache['loadingOffsetHeight'] = loading.parentNode.offsetHeight;
+			this.cache['']
+ 			let list = content.querySelectorAll('.item');
 			let elem = list[list.length-1].getBoundingClientRect();
 			let nav = navga.getBoundingClientRect();
 			this.maxOffset = elem.bottom - nav.top;
 		},
 
 		updated() {
-			let content = this.$refs.content;
-			let navga = this.$refs.navga;
-			let list = content.querySelectorAll('.item');
-			let elem = list[list.length-1].getBoundingClientRect();
-			let nav = navga.getBoundingClientRect();
-			this.maxOffset += elem.bottom - nav.top;
+			if(this.offset < 0) {
+				let content = this.cache.content;
+				let navga = this.cache.navga;
+				let list = content.querySelectorAll('.item');
+				let elem = list[list.length-1].getBoundingClientRect();
+				let nav = navga.getBoundingClientRect();
+				this.maxOffset += elem.bottom - nav.top;
+				console.log(this.maxOffset)
+			}
 		},
 
 		computed: {
@@ -67,13 +81,15 @@
 
 			contentTouchMove(e) {
 				let cp = {x: e.touches[0].pageX, y: e.touches[0].pageY};
-				let carouselWrap = this.$refs.carouselWrap;
-				let content = this.$refs.content;
-				let loading = this.$refs.loading;
+				let carouselWrap = this.cache.carouselWrap;
+				let content = this.cache.content;
+				let loading = this.cache.loading;
+				let loadingOffsetHeight = this.cache.loadingOffsetHeight;
+				let carouselWrapOffsetHeight = this.cache.carouselWrapOffsetHeight;
 				if(this.isScroll) {
 					if(cp.y > this.startPoint.y && this.offset > 0) {
 						this.offset += (cp.y - this.startPoint.y) * 0.3;
-						if(this.offset >= loading.parentNode.offsetHeight/2) {
+						if(this.offset >= loadingOffsetHeight * 0.8) {
 							this.freshText = '释放更新';
 						}
 					} else {
@@ -84,13 +100,15 @@
 						this.offset = -this.maxOffset;
 					}
 
-					if(this.offset < 0 && Math.abs(this.offset) >= carouselWrap.offsetHeight/2) {
-						carouselWrap.style.transform = 'translate3d(0, ' +(-carouselWrap.offsetHeight/2) + 'px, 0)';
+					if(this.offset < 0 && Math.abs(this.offset) >= carouselWrapOffsetHeight/2) {
+						carouselWrap.style.transform = 'translate3d(0, ' +(-carouselWrapOffsetHeight/2) + 'px, 0)';
 
 						if(Math.abs(this.offset) >= this.maxOffset) {
 							content.style.transform = 'translate3d(0, ' + (0-this.maxOffset) + 'px, 0)';
 							this.isScroll = false;
-							setTimeout(() => {
+							// 用于防止多次触发导致偏移差变大
+							clearTimeout(this.pollTimer);
+							this.pollTimer = setTimeout(() => {
 								if(this.list.length < 16) {
 									this.list = this.list.concat([{text: '文本'},{text: '文本'}]);
 								}
@@ -109,6 +127,7 @@
 						loading.parentNode.style.transform = 'translate3d(0, ' + this.offset + 'px, 0)';
 					} else {
 						//header.style.top = this.offset + 'px';
+						// 通过同时translate轮播和展示列表的方式来实现同时移动或一个移动一个固定（translate固定某一个位置）
 						carouselWrap.style.transform = 'translate3d(0, ' + this.offset + 'px, 0)';
 						content.style.transform = 'translate3d(0, ' + this.offset + 'px, 0)';
 					}
@@ -119,23 +138,30 @@
 
 			contentTouchEnd(e) {
 				this.isScroll = false;
-
+				let loadingOffsetHeight = this.cache.loadingOffsetHeight;
 				if(this.offset > 0) {
-					let carouselWrap = this.$refs.carouselWrap;
-					let content = this.$refs.content;
-					let loading = this.$refs.loading;
-					loading.style.animationPlayState = 'running';
-					carouselWrap.style.transform = 'translate3d(0, 1.4rem, 0)';
-					content.style.transform = 'translate3d(0, 1.4rem, 0)';
-					loading.parentNode.style.transform = 'translate3d(0, 1.4rem, 0)';
-
-					setTimeout(() => {
-						this.freshText = '下拉更新';
+					let carouselWrap = this.cache.carouselWrap;
+					let content = this.cache.content;
+					let loading = this.cache.loading;
+					if(this.offset >= loadingOffsetHeight * 0.8) {
+						this.freshText = '刷新中';
+						loading.style.animationPlayState = 'running';
+						carouselWrap.style.transform = 'translate3d(0, 1.4rem, 0)';
+						content.style.transform = 'translate3d(0, 1.4rem, 0)';
+						loading.parentNode.style.transform = 'translate3d(0, 1.4rem, 0)';
+						setTimeout(() => {
+							this.freshText = '下拉更新';
+							loading.parentNode.style.transform = 'translate3d(0, 0, 0)';
+							loading.style.animationPlayState = 'paused';
+							carouselWrap.style.transform = 'translate3d(0, 0, 0)';
+							content.style.transform = 'translate3d(0, 0, 0)';
+						}, 2000);
+					} else {
 						loading.parentNode.style.transform = 'translate3d(0, 0, 0)';
 						loading.style.animationPlayState = 'paused';
 						carouselWrap.style.transform = 'translate3d(0, 0, 0)';
 						content.style.transform = 'translate3d(0, 0, 0)';
-					}, 2000);
+					}
 				}
 			}
 		}
