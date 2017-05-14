@@ -4,8 +4,14 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import store from './store'
+import velocity from 'velocity-animate'
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
+
+// 引入第三方的库
+Object.defineProperty(Vue.prototype, '$velocity', {
+	value: velocity
+});
 
 /* eslint-disable no-new */
 new Vue({

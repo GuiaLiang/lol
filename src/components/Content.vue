@@ -5,7 +5,10 @@
 			<span class="text"> {{freshText}} </span>
 		</div>
 		
-		<div class="carousel-wrap" ref="carouselWrap"></div>
+		<div class="carousel-wrap" ref="carouselWrap">
+			<!-- 传递参数时使用bind进行参数绑定，否则传递的“1”会被当成字符串而不是数值 -->
+			<carousel :imgs="imgs" :delay="2000" :indexShow="true"></carousel>
+		</div>
 
 		<div class="content-wrap" ref="contentWrap">
 			<!-- <div class="carousel-wrap" :class="{carouselfixed: isCarouselFixed}" ref="carouselWrap"></div> -->
@@ -20,19 +23,26 @@
 </template>
 
 <script>
+	import Carousel from '@/components/Carousel';
+
 	export default {
 		name: 'Content',
+		
+		components: {
+			Carousel
+		},
 
 		data() {
 			return {
-				cache: {},
+				cache: {}, // 用于本组件成员的缓存
 				freshText: '下拉更新',
 				startPoint: {x: 0, y: 0},
 				offset: 0,
 				maxOffset: 0,
 				isScroll: false,
 				pollTimer: 0,
-				list: [{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'}]
+				list: [{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'}],
+				imgs: ['static/images/content/ban1.jpg', 'static/images/content/ban2.jpg', 'static/images/content/ban3.jpg', 'static/images/content/ban4.jpg', 'static/images/content/ban5.jpg']
 			}
 		},
 

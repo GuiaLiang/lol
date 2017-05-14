@@ -26,6 +26,12 @@ export default {
         background-color: rgba(200, 200, 200, 1);
     }
 
+    ul,p,li {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+    }
+
     #app {
         width: 100%;
         height: 100%;
