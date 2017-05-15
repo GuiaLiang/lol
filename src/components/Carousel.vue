@@ -1,6 +1,6 @@
 <template>
 	<div class="carousel-container">
-		<div class="carousel-content" ref="carouselContent">
+		<div class="carousel-content" ref="carouselContent" @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd">
 			<ul class="wrap" :style="{width: (imgs.length+2)*100+'%', transform: 'translateX(-' + 100/(imgs.length+2)+'%)'}" ref="carouselContentWrap">
 				<li class="item" key="carousel-content-0" :style="{background: 'url('+imgs[imgs.length-1]+') center / cover no-repeat', width: 100/(imgs.length+2)+'%'}"></li>
 				<li class="item" v-for="(val, i) in imgs" key="carousel-content-{{i+1}}" :style="{background: 'url('+val+') center / cover no-repeat', width: 100/(imgs.length+2)+'%'}">
@@ -46,6 +46,7 @@
 				offsetWidth: 0,
 				offset: 0,
 				isPlay: true,
+				point: {},
 				cache: {}
 			}
 		},
@@ -54,6 +55,7 @@
 			this.offsetWidth = this.$refs.carouselContent.offsetWidth;
 			this.offset = -this.offsetWidth;
 			this.cache.carouselContentWrap = this.$refs.carouselContent.querySelector('.wrap');
+			this.cache.carouselContent = this.$refs.carouselContent;
 			this.play();
 		},
 
@@ -75,19 +77,96 @@
 		},
 
 		methods: {
+			touchStart(e) {
+				// 用于阻止自动滚动
+				clearTimeout(this.timerId);
+				this.isPlay = false;
+
+				// 用于阻止点击滑动后的再次自动滚动
+				clearTimeout(this.cache.touchTimerId);
+				this.point = {x: e.touches[0].pageX, y: e.touches[0].pageY};
+				this.cache.offset = this.offset;
+			},
+
+			touchMove(e) {
+				let curPoint = {x: e.touches[0].pageX, y: e.touches[0].pageY};
+				this.offset += curPoint.x - this.point.x;
+				// if(curPoint.x > this.point.x) {
+				// 	this.cache.ordered = true;
+				// } else {
+				// 	this.cache.ordered = false;
+				// }
+				this.cache.carouselContentWrap.style.transform = "translateX(" + this.offset + 'px)';
+				this.point = curPoint;
+			},
+
+			touchEnd(e) {
+				// if(!this.cache.ordered) {
+				// 	this.offset = this.cache.offset - this.offsetWidth;
+				// } else {
+				// 	this.offset = this.cache.offset + this.offsetWidth;
+				// }
+				let self = this;
+				if(this.cache.offset > this.offset) {
+					this.offset = this.cache.offset - this.offsetWidth;
+
+					if(this.curIndex < this.imgs.length-1) {
+						this.curIndex++;
+					} else {
+						this.curIndex = 0;
+					}
+				} else {
+					this.offset = this.cache.offset + this.offsetWidth;
+
+					if(this.curIndex > 0) {
+						this.curIndex--;
+					} else {
+						this.curIndex = this.imgs.length-1;
+					}
+				}
+
+				this.$velocity(this.cache.carouselContentWrap, {translateX: this.offset + 'px'}, { 
+						duration: 50, 
+						complete: function() {
+							if(self.offset === -self.offsetWidth * (self.imgs.length+1)) {
+								self.offset = -self.offsetWidth;
+								self.$velocity(self.cache.carouselContentWrap, {
+									translateX: self.offset+'px'
+								}, { duration: 0 });
+							} else if(self.offset === 0) {
+								self.offset = -self.offsetWidth * self.imgs.length;
+								self.$velocity(self.cache.carouselContentWrap, {
+									translateX: self.offset+'px'
+								}, { duration: 0 });
+							}
+
+							self.cache.touchTimerId = setTimeout(() => {
+								self.isPlay = true;
+								self.play();
+							}, 3000);
+						}
+				});
+			},
+
 			play() {
 				this.timerId = setTimeout(() => {
 					if(this.isPlay) {
 						let self = this;
-						if(this.offset === 0) {
-							this.offset -= this.offsetWidth;
+						// if(this.offset === 0) {
+						// 	this.offset -= this.offsetWidth;
+						// } else {
+						// 	// if(this.offset === -this.offsetWidth * (this.imgs.length+1)) {
+						// 	// 	this.offset = 0;
+						// 	// } else {
+						// 	// 	this.offset -= this.offsetWidth;
+						// 	// }
+						// 	this.offset -= this.offsetWidth;
+						// }
+						this.offset -= this.offsetWidth;
+						if(this.curIndex < this.imgs.length-1) {
+							this.curIndex++;
 						} else {
-							// if(this.offset === -this.offsetWidth * (this.imgs.length+1)) {
-							// 	this.offset = 0;
-							// } else {
-							// 	this.offset -= this.offsetWidth;
-							// }
-							this.offset -= this.offsetWidth;
+							this.curIndex = 0;
 						}
 						this.$velocity(this.cache.carouselContentWrap, {translateX: this.offset + 'px'}, {
 							complete: function() {
