@@ -8,6 +8,7 @@
 		<div class="carousel-wrap" ref="carouselWrap">
 			<!-- 传递参数时使用bind进行参数绑定，否则传递的“1”会被当成字符串而不是数值 -->
 			<carousel :imgs="imgs" :delay="2000" :indexShow="true"></carousel>
+			<navbar></navbar>
 		</div>
 
 		<div class="content-wrap" ref="contentWrap">
@@ -24,12 +25,14 @@
 
 <script>
 	import Carousel from '@/components/Carousel';
+	import Navbar from '@/components/Navbar';
 
 	export default {
 		name: 'Content',
 		
 		components: {
-			Carousel
+			Carousel,
+			Navbar
 		},
 
 		data() {
@@ -239,7 +242,6 @@
 		}
 
 		.carousel-wrap {
-			background-color: red;
 			position: absolute;
 			top: 0;
 			z-index: 10;

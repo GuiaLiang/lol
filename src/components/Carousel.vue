@@ -91,21 +91,13 @@
 			touchMove(e) {
 				let curPoint = {x: e.touches[0].pageX, y: e.touches[0].pageY};
 				this.offset += curPoint.x - this.point.x;
-				// if(curPoint.x > this.point.x) {
-				// 	this.cache.ordered = true;
-				// } else {
-				// 	this.cache.ordered = false;
-				// }
-				this.cache.carouselContentWrap.style.transform = "translateX(" + this.offset + 'px)';
+
+				//this.cache.carouselContentWrap.style.transform = "translateX(" + this.offset + 'px)';
+				this.$velocity(this.cache.carouselContentWrap, {translateX: this.offset + 'px'}, {duration: 0});
 				this.point = curPoint;
 			},
 
 			touchEnd(e) {
-				// if(!this.cache.ordered) {
-				// 	this.offset = this.cache.offset - this.offsetWidth;
-				// } else {
-				// 	this.offset = this.cache.offset + this.offsetWidth;
-				// }
 				let self = this;
 				if(this.cache.offset > this.offset) {
 					this.offset = this.cache.offset - this.offsetWidth;
@@ -126,7 +118,7 @@
 				}
 
 				this.$velocity(this.cache.carouselContentWrap, {translateX: this.offset + 'px'}, { 
-						duration: 50, 
+						duration: 300, 
 						complete: function() {
 							if(self.offset === -self.offsetWidth * (self.imgs.length+1)) {
 								self.offset = -self.offsetWidth;
@@ -152,16 +144,6 @@
 				this.timerId = setTimeout(() => {
 					if(this.isPlay) {
 						let self = this;
-						// if(this.offset === 0) {
-						// 	this.offset -= this.offsetWidth;
-						// } else {
-						// 	// if(this.offset === -this.offsetWidth * (this.imgs.length+1)) {
-						// 	// 	this.offset = 0;
-						// 	// } else {
-						// 	// 	this.offset -= this.offsetWidth;
-						// 	// }
-						// 	this.offset -= this.offsetWidth;
-						// }
 						this.offset -= this.offsetWidth;
 						if(this.curIndex < this.imgs.length-1) {
 							this.curIndex++;
