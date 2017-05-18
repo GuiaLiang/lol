@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Hello from '@/components/Hello'
 import Login from '@/components/Login'
 import Content from '@/components/Content'
+import Lastest from '@/components/Lastest'
 
 Vue.use(Router)
 
@@ -18,7 +19,11 @@ export default new Router({
 		{
 			path: '/index',
 			name: 'Content',
-			component: Content
+			component: Content,
+			children: [{
+				path: 'lastest',
+				component: Lastest
+			}]
 		}
 	]
 })

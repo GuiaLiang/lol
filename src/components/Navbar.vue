@@ -1,7 +1,7 @@
 <template>
 	<div class="nav-container" ref="navContainer">
 		<ul class="wrap" ref="navWrap" :style="{width: content.length * 22 + '%'}">
-			<li class="item" v-for="(val, i) in content" key="nav-{{i}}" @touchstart="slideStart" @touchend.stop.prevent="slideEnd($event,i)">{{val}}</li>
+			<li class="item" :class="{selected: curIndex===i}" v-for="(val, i) in content" key="nav-{{i}}" @touchstart="slideStart" @touchmove="slideMove" @touchend.stop.prevent="slideEnd($event,i)">{{val}}</li>
 		</ul>
 	</div>
 </template>
@@ -13,7 +13,11 @@
 		data() {
 			return {
 				content: ['最新', '官方', '娱乐', '活动', '攻略','收藏'],
+				curIndex: 0,
 				startTime: 0,
+				isSlide: false,
+				offset: 0,
+				point: {},
 				cache: {}
 			};
 		},
@@ -32,10 +36,30 @@
 		methods: {
 			slideStart(e) {
 				this.startTime = +new Date();
+				this.isSlide = true;
+				this.point = {x: e.touches[0].pageX, y: e.touches[0].pageY};
 			},
+
+			slideMove(e) {
+				if(this.isSlide) {
+					let curPoint = {x: e.touches[0].pageX, y: e.touches[0].pageY};
+					this.offset += curPoint.x - this.point.x;
+					if(this.offset < this.cache.navContainerWidth - this.cache.navWrapWidth) {
+						this.offset = this.cache.navContainerWidth - this.cache.navWrapWidth;
+					} else if(this.offset > 0) {
+						this.offset = 0;
+					}
+
+					this.$velocity(this.cache.navWrap, { translateX: this.offset + 'px' }, { duration: 0 });
+
+					this.point = curPoint;
+				}
+			},
+
 			// 通过$event来传递响应的event对象
 			slideEnd(e, i) {
 				let end = +new Date();
+				this.isSlide = false;
 				if(end - this.startTime < 250) {
 					// 计算选中导航栏居中的位置，以5个显示为标准，左边两个右边两个，计算方式如下：
 					// 1、当所选导航栏左边少于两个兄弟时，translateX为0；
@@ -50,6 +74,8 @@
 						this.$velocity(this.cache.navWrap, { translateX: offset+'px' });
 
 					}
+
+					this.curIndex = i;
 				}
 			}
 		}
@@ -97,6 +123,22 @@
 			.item {
 				flex-grow: 1;
 				height: 100%;
+				position: relative;
+
+				&.selected {
+					color: #d8b868;
+
+					&:after {
+						content: "";
+						position: absolute;
+					    bottom: 10%;
+					    left: 50%;
+					    transform: translateX(-50%);
+						width: 1.04rem;
+						height: 0.1467rem;
+						background: url('../assets/images/content/pager_tab_selected.png') center / contain no-repeat;
+					}
+				}
 			}
 		}
 	}

@@ -11,12 +11,13 @@
 			<navbar></navbar>
 		</div>
 
-		<div class="content-wrap" ref="contentWrap">
-			<!-- <div class="carousel-wrap" :class="{carouselfixed: isCarouselFixed}" ref="carouselWrap"></div> -->
-			<div class="slide-content" ref="content" @touchstart.stop.prevent="contentTouchStart" @touchmove.stop.prevent="contentTouchMove" @touchend.stop.prevent="contentTouchEnd">
+		<!-- <div class="content-wrap" ref="contentWrap"> -->
+		<div class="content-wrap" ref="content" @touchstart.stop.prevent="contentTouchStart" @touchmove.stop.prevent="contentTouchMove" @touchend.stop.prevent="contentTouchEnd">
+			<!-- <div class="slide-content" ref="content" @touchstart.stop.prevent="contentTouchStart" @touchmove.stop.prevent="contentTouchMove" @touchend.stop.prevent="contentTouchEnd">
 				<div class="item" v-for="(val, i) in list">{{val.text}}-{{i}}</div>
-			</div>
-			<!-- <router-view></router-view> -->
+			</div> -->
+				<!-- <div class="item" v-for="(val, i) in list">{{val.text}}-{{i}}</div> -->
+			<router-view></router-view>
 		</div>
 
 		<div class="navga" ref="navga"></div>
@@ -45,7 +46,7 @@
 				isScroll: false,
 				pollTimer: 0,
 				list: [{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'}],
-				imgs: ['static/images/content/ban1.jpg', 'static/images/content/ban2.jpg', 'static/images/content/ban3.jpg', 'static/images/content/ban4.jpg', 'static/images/content/ban5.jpg']
+				imgs: ['/static/images/content/ban1.jpg', '/static/images/content/ban2.jpg', '/static/images/content/ban3.jpg', '/static/images/content/ban4.jpg', '/static/images/content/ban5.jpg']
 			}
 		},
 
@@ -216,7 +217,7 @@
 		}
 
 		.content-wrap {
-			margin: 4.4rem 0 1.6rem;
+			margin: 4.5rem 0 1.6rem;
 
 			.item {
 				width: 100%;
