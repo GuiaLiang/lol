@@ -8,16 +8,18 @@
 		<div class="carousel-wrap" ref="carouselWrap">
 			<!-- 传递参数时使用bind进行参数绑定，否则传递的“1”会被当成字符串而不是数值 -->
 			<carousel :imgs="imgs" :delay="2000" :indexShow="true"></carousel>
-			<navbar></navbar>
+			<navbar :content="this.navBar"></navbar>
 		</div>
 
 		<!-- <div class="content-wrap" ref="contentWrap"> -->
 		<div class="content-wrap" ref="content" @touchstart.stop.prevent="contentTouchStart" @touchmove.stop.prevent="contentTouchMove" @touchend.stop.prevent="contentTouchEnd">
-			<!-- <div class="slide-content" ref="content" @touchstart.stop.prevent="contentTouchStart" @touchmove.stop.prevent="contentTouchMove" @touchend.stop.prevent="contentTouchEnd">
-				<div class="item" v-for="(val, i) in list">{{val.text}}-{{i}}</div>
-			</div> -->
+			<div class="slide-content-wrap" :style="{width: this.navBar.length * 100 + '%'}">
+				<div class="slide-content" v-for="si in 6" key="slide-content-{{si}}" @touchstart.stop.prevent="contentTouchStart" @touchmove.stop.prevent="contentTouchMove" @touchend.stop.prevent="contentTouchEnd">
+					<div class="item" v-for="(val, i) in list">{{val.text}}-{{i}}</div>
+				</div>
+			</div>
 				<!-- <div class="item" v-for="(val, i) in list">{{val.text}}-{{i}}</div> -->
-			<router-view></router-view>
+			<!-- <router-view></router-view> -->
 		</div>
 
 		<div class="navga" ref="navga"></div>
@@ -38,6 +40,7 @@
 
 		data() {
 			return {
+				navBar: ['最新', '官方', '娱乐', '活动', '攻略', '收藏'],
 				cache: {}, // 用于本组件成员的缓存
 				freshText: '下拉更新',
 				startPoint: {x: 0, y: 0},
@@ -61,7 +64,7 @@
 			this.cache['loading'] = loading;
 			this.cache['carouselWrapOffsetHeight'] = carouselWrap.offsetHeight;
 			this.cache['loadingOffsetHeight'] = loading.parentNode.offsetHeight;
-			this.cache['']
+			this.cache['carouselContainer'] = carouselWrap.querySelector('.carousel-container');
  			let list = content.querySelectorAll('.item');
 			let elem = list[list.length-1].getBoundingClientRect();
 			let nav = navga.getBoundingClientRect();
@@ -114,8 +117,13 @@
 						this.offset = -this.maxOffset;
 					}
 
+					if(this.offset < 0 && Math.abs(this.offset) >= carouselWrapOffsetHeight/6) {
+						this.cache.carouselContainer.style.filter = 'blur(1px)';
+					}
+
 					if(this.offset < 0 && Math.abs(this.offset) >= carouselWrapOffsetHeight/2) {
 						carouselWrap.style.transform = 'translate3d(0, ' +(-carouselWrapOffsetHeight/2) + 'px, 0)';
+						this.cache.carouselContainer.style.filter = 'blur(2px)';
 
 						if(Math.abs(this.offset) >= this.maxOffset) {
 							content.style.transform = 'translate3d(0, ' + (0-this.maxOffset) + 'px, 0)';
@@ -218,6 +226,17 @@
 
 		.content-wrap {
 			margin: 4.5rem 0 1.6rem;
+
+			.slide-content-wrap {
+				display: flex;
+				flex-direction: row;
+				flex-wrap: nowrap;
+
+				.slide-content {
+					flex-grow: 1;
+				}
+			}
+
 
 			.item {
 				width: 100%;

@@ -7,12 +7,20 @@
 </template>
 
 <script>
+	import {CONTENT_NAVBAR_ACTION} from '@/store/mutation-types'
+
 	export default {
 		name: 'Navbar',
 
+		props: {
+			content: {
+				type: Array,
+				required: true
+			}
+		},
+
 		data() {
 			return {
-				content: ['最新', '官方', '娱乐', '活动', '攻略','收藏'],
 				curIndex: 0,
 				startTime: 0,
 				isSlide: false,
@@ -20,6 +28,10 @@
 				point: {},
 				cache: {}
 			};
+		},
+
+		created() {
+			this.$store.dispatch(CONTENT_NAVBAR_ACTION, this.content);
 		},
 
 		mounted() {

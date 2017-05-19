@@ -19,11 +19,7 @@ export default new Router({
 		{
 			path: '/index',
 			name: 'Content',
-			component: Content,
-			children: [{
-				path: 'lastest',
-				component: Lastest
-			}]
+			component: Content
 		}
 	]
 })
