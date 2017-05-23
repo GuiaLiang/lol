@@ -4,6 +4,8 @@
 			<i ref="loading"></i>
 			<span class="text"> {{freshText}} </span>
 		</div>
+
+		<div class="user-info-wrap" ref="userInfoWrap"></div>
 		
 		<div class="carousel-wrap" ref="carouselWrap">
 			<!-- 传递参数时使用bind进行参数绑定，否则传递的“1”会被当成字符串而不是数值 -->
@@ -15,7 +17,9 @@
 		<div class="content-wrap" ref="content" @touchstart.stop.prevent="contentTouchStart" @touchmove.stop.prevent="contentTouchMove" @touchend.stop.prevent="contentTouchEnd">
 			<div class="slide-content-wrap" :style="{width: this.navBar.length * 100 + '%'}">
 				<div class="slide-content" v-for="si in 6" key="slide-content-{{si}}" @touchstart.stop.prevent="contentTouchStart" @touchmove.stop.prevent="contentTouchMove" @touchend.stop.prevent="contentTouchEnd">
-					<div class="item" v-for="(val, i) in list">{{val.text}}-{{i}}</div>
+					<!-- 在for循环中，不能再通过使用this来访问vue的data，因为此时的this不是指向vue实例 -->
+					<items :content="contents[si-1].content"></items>
+					<!-- <div>{{Object.keys(this)}}</div> -->
 				</div>
 			</div>
 				<!-- <div class="item" v-for="(val, i) in list">{{val.text}}-{{i}}</div> -->
@@ -29,13 +33,15 @@
 <script>
 	import Carousel from '@/components/Carousel';
 	import Navbar from '@/components/Navbar';
+	import Items from '@/components/Items';
 
 	export default {
 		name: 'Content',
 		
 		components: {
 			Carousel,
-			Navbar
+			Navbar,
+			Items
 		},
 
 		data() {
@@ -49,7 +55,33 @@
 				isScroll: false,
 				pollTimer: 0,
 				list: [{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'},{text: '文本'}],
-				imgs: ['/static/images/content/ban1.jpg', '/static/images/content/ban2.jpg', '/static/images/content/ban3.jpg', '/static/images/content/ban4.jpg', '/static/images/content/ban5.jpg']
+				imgs: ['/static/images/content/ban1.jpg', '/static/images/content/ban2.jpg', '/static/images/content/ban3.jpg', '/static/images/content/ban4.jpg', '/static/images/content/ban5.jpg'],
+				contents: [
+					{
+						type: 'lastest',
+						content: [{img: '/static/images/content/ban5.jpg', title: 'lastest-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'}, {img: '/static/images/content/ban5.jpg', title: 'lastest-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'lastest-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'lastest-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'lastest-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'lastest-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'}]
+					},
+					{
+						type: 'offical',
+						content: []
+					},
+					{
+						type: 'funny',
+						content: []
+					},
+					{
+						type: 'activities',
+						content: []
+					},
+					{
+						type: 'strategy',
+						content: []
+					},
+					{
+						type: 'collection',
+						content: []
+					}
+				]
 			}
 		},
 
@@ -58,6 +90,7 @@
 			let navga = this.$refs.navga;
 			let carouselWrap = this.$refs.carouselWrap;
 			let loading = this.$refs.loading;
+			let userInfoWrap = this.$refs.userInfoWrap;
 			this.cache['content'] = content;
 			this.cache['navga'] = navga;
 			this.cache['carouselWrap'] = carouselWrap;
@@ -65,10 +98,13 @@
 			this.cache['carouselWrapOffsetHeight'] = carouselWrap.offsetHeight;
 			this.cache['loadingOffsetHeight'] = loading.parentNode.offsetHeight;
 			this.cache['carouselContainer'] = carouselWrap.querySelector('.carousel-container');
+			this.cache['userInfoWrap'] = userInfoWrap;
  			let list = content.querySelectorAll('.item');
-			let elem = list[list.length-1].getBoundingClientRect();
-			let nav = navga.getBoundingClientRect();
-			this.maxOffset = elem.bottom - nav.top;
+ 			if(list && list.length > 0) {
+				let elem = list[list.length-1].getBoundingClientRect();
+				let nav = navga.getBoundingClientRect();
+				this.maxOffset = elem.bottom - nav.top;
+ 			}
 		},
 
 		updated() {
@@ -118,12 +154,16 @@
 					}
 
 					if(this.offset < 0 && Math.abs(this.offset) >= carouselWrapOffsetHeight/6) {
-						this.cache.carouselContainer.style.filter = 'blur(1px)';
+						this.cache.userInfoWrap.style.backgroundColor = 'rgba(0,0,0,.3)';
+					}
+
+					if(this.offset < 0 && Math.abs(this.offset) >= carouselWrapOffsetHeight/3) {
+						this.cache.userInfoWrap.style.backgroundColor = 'rgba(0,0,0,.4)';
 					}
 
 					if(this.offset < 0 && Math.abs(this.offset) >= carouselWrapOffsetHeight/2) {
 						carouselWrap.style.transform = 'translate3d(0, ' +(-carouselWrapOffsetHeight/2) + 'px, 0)';
-						this.cache.carouselContainer.style.filter = 'blur(2px)';
+						this.cache.userInfoWrap.style.backgroundColor = 'rgba(0,0,0,.5)';
 
 						if(Math.abs(this.offset) >= this.maxOffset) {
 							content.style.transform = 'translate3d(0, ' + (0-this.maxOffset) + 'px, 0)';
@@ -143,6 +183,8 @@
 					} else if(this.offset >= 0) {
 						// carouselWrap.style.transform = 'translate3d(0, 0, 0)';
 						// content.style.transform = 'translate3d(0, 0, 0)';
+						this.cache.userInfoWrap.style.backgroundColor = 'rgba(0,0,0,0)';
+						this.cache.userInfoWrap.style.transform = 'translate3d(0, ' + this.offset + 'px, 0)';
 						loading.style.animationPlayState = 'paused';
 						carouselWrap.style.transform = 'translate3d(0, ' + this.offset + 'px, 0)';
 						content.style.transform = 'translate3d(0, ' + this.offset + 'px, 0)';
@@ -165,24 +207,29 @@
 					let carouselWrap = this.cache.carouselWrap;
 					let content = this.cache.content;
 					let loading = this.cache.loading;
+					let userInfoWrap = this.cache.userInfoWrap;
 					if(this.offset >= loadingOffsetHeight * 0.8) {
 						this.freshText = '刷新中';
 						loading.style.animationPlayState = 'running';
 						carouselWrap.style.transform = 'translate3d(0, 1.4rem, 0)';
 						content.style.transform = 'translate3d(0, 1.4rem, 0)';
 						loading.parentNode.style.transform = 'translate3d(0, 1.4rem, 0)';
+						userInfoWrap.style.transform = 'translate3d(0, 1.4rem, 0)';
+
 						setTimeout(() => {
 							this.freshText = '下拉更新';
 							loading.parentNode.style.transform = 'translate3d(0, 0, 0)';
 							loading.style.animationPlayState = 'paused';
 							carouselWrap.style.transform = 'translate3d(0, 0, 0)';
 							content.style.transform = 'translate3d(0, 0, 0)';
+							userInfoWrap.style.transform = 'translate3d(0, 0, 0)';
 						}, 2000);
 					} else {
 						loading.parentNode.style.transform = 'translate3d(0, 0, 0)';
 						loading.style.animationPlayState = 'paused';
 						carouselWrap.style.transform = 'translate3d(0, 0, 0)';
 						content.style.transform = 'translate3d(0, 0, 0)';
+						userInfoWrap.style.transform = 'translate3d(0, 0, 0)';
 					}
 				}
 			}
@@ -201,6 +248,17 @@
 		position: relative;
 		background-color: #fff;
 
+		.user-info-wrap {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 1.2rem;
+			background-color: rgba(0, 0, 0, 0);
+			z-index: 20;
+			color: #d8b868;
+		}
+
 		.fresh-loading {
 			position: absolute;
 			top: -1.4rem;
@@ -212,8 +270,9 @@
 			i {
 				display: block;
 				margin: 0 auto;
-				width: .72rem;
-				height: .83rem;
+				width: .74rem;
+				height: .74rem;
+				background-position: center;
 				animation: updateAnimation .6s step-end infinite;
 			}
 
@@ -238,11 +297,11 @@
 			}
 
 
-			.item {
-				width: 100%;
-				height: 2.8rem;
-				vertical-align: middle;
-			}
+			// .item {
+			// 	width: 100%;
+			// 	height: 2.8rem;
+			// 	vertical-align: middle;
+			// }
 			// flex-grow: 1;
 			// overflow-y: auto;
 			// position: relative;
