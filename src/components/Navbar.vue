@@ -1,13 +1,13 @@
 <template>
 	<div class="nav-container" ref="navContainer">
-		<ul class="wrap" ref="navWrap" :style="{width: content.length * 22 + '%'}">
+		<ul class="wrap" ref="navWrap" :style="{width: content.length * 22 + '%', 'transform': 'translateX(' + initOffset + 'px)'}">
 			<li class="item" :class="{selected: curIndex===i}" v-for="(val, i) in content" key="nav-{{i}}" @touchstart="slideStart" @touchmove="slideMove" @touchend.stop.prevent="slideEnd($event,i)">{{val}}</li>
 		</ul>
 	</div>
 </template>
 
 <script>
-	import {CONTENT_NAVBAR_ACTION} from '@/store/mutation-types'
+	import {CONTENT_NAVBAR_ACTION, CONTENT_NAVBAR_CHANGE_ACTION} from '@/store/mutation-types'
 
 	export default {
 		name: 'Navbar',
@@ -21,13 +21,33 @@
 
 		data() {
 			return {
-				curIndex: 0,
+				// curIndex: 0,
 				startTime: 0,
 				isSlide: false,
 				offset: 0,
 				point: {},
 				cache: {}
 			};
+		},
+
+		computed: {
+			initOffset() {
+				let offset = 0;
+				let i = this.curIndex;
+				if(i < 2) {
+					offset = 0;
+				} else if(this.content.length - i < 3) {
+					offset = this.cache.navContainerWidth - this.cache.navWrapWidth;
+				} else {
+					offset = (2 - i) * this.cache.itemWidth + (this.cache.navContainerWidth/2 - this.cache.itemWidth * 2.5);
+				}
+
+				return offset;
+			},
+
+			curIndex() {
+				return this.$store.state.content.navIndex;
+			}
 		},
 
 		created() {
@@ -87,7 +107,7 @@
 
 					}
 
-					this.curIndex = i;
+					this.$store.dispatch(CONTENT_NAVBAR_CHANGE_ACTION, i);
 				}
 			}
 		}
