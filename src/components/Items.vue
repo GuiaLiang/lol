@@ -70,6 +70,11 @@
 			vertical-align: middle;
 			padding: .2rem;
 			background-color: #fff;
+			margin-top: .3rem;
+
+			&:first-child {
+				margin-top: 0;
+			}
 
 			.left {
 				float: left;

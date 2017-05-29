@@ -1,7 +1,7 @@
 <template>
 	<div class="nav-container" ref="navContainer">
 		<ul class="wrap" ref="navWrap" :style="{width: content.length * 22 + '%', 'transform': 'translateX(' + initOffset + 'px)'}">
-			<li class="item" :class="{selected: curIndex===i}" v-for="(val, i) in content" key="nav-{{i}}" @touchstart="slideStart" @touchmove="slideMove" @touchend.stop.prevent="slideEnd($event,i)">{{val}}</li>
+			<li class="item" :class="{selected: curIndex===i}" v-for="(val, i) in content" key="nav-{{i}}" @touchstart="slideStart" @touchmove="slideMove" @touchend.stop.prevent="slideEnd($event,i)">{{val.text}}</li>
 		</ul>
 	</div>
 </template>

@@ -35,7 +35,7 @@
 	import Carousel from '@/components/Carousel';
 	import Navbar from '@/components/Navbar';
 	import Items from '@/components/Items';
-	import {CONTENT_NAVBAR_CHANGE_ACTION} from '@/store/mutation-types'
+	import {CONTENT_NAVBAR_CHANGE_ACTION, CONTENT_ITEMS_UPDATE_ACTION} from '@/store/mutation-types'
 
 	export default {
 		name: 'Content',
@@ -48,45 +48,19 @@
 
 		data() {
 			return {
-				navBar: ['最新', '官方', '娱乐', '活动', '攻略', '收藏'],
+				navBar: [{type: 'lastest', text: '最新'}, {type: 'offical', text: '官方'}, {type: 'funny', text: '娱乐'}, {type: 'activities', text: '活动'}, {type: 'strategy', text: '攻略'}, {type: 'collection', text: '收藏'}],
 				cache: {}, // 用于本组件成员的缓存
 				freshText: '下拉更新',
 				startPoint: {x: 0, y: 0},
 				offset: 0,
 				maxOffset: 0,
 				isScroll: false,
-				pollTimer: 0,
+				pollTimer: null,
 				slidePoint: {x: 0, y: 0},
 				slideOffset: 0,
 				isSlide: false,
 				slideTimer: null,
-				imgs: ['/static/images/content/ban1.jpg', '/static/images/content/ban2.jpg', '/static/images/content/ban3.jpg', '/static/images/content/ban4.jpg', '/static/images/content/ban5.jpg'],
-				contents: [
-					{
-						type: 'lastest',
-						content: [{img: '/static/images/content/ban5.jpg', title: 'lastest-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-24 21:00:00', read: '208.0万阅'}, {img: '/static/images/content/ban5.jpg', title: 'lastest-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'lastest-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'lastest-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'lastest-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'lastest-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'}]
-					},
-					{
-						type: 'offical',
-						content: [{img: '/static/images/content/ban5.jpg', title: 'offical-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'}, {img: '/static/images/content/ban5.jpg', title: 'offical-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'offical-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'offical-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'offical-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'offical-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'}]
-					},
-					{
-						type: 'funny',
-						content: [{img: '/static/images/content/ban5.jpg', title: 'funny-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'}, {img: '/static/images/content/ban5.jpg', title: 'funny-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'funny-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'funny-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'funny-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'funny-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'}]
-					},
-					{
-						type: 'activities',
-						content: [{img: '/static/images/content/ban5.jpg', title: 'activities-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'}, {img: '/static/images/content/ban5.jpg', title: 'activities-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'activities-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'activities-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'activities-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'activities-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'}]
-					},
-					{
-						type: 'strategy',
-						content: [{img: '/static/images/content/ban5.jpg', title: 'strategy-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'}, {img: '/static/images/content/ban5.jpg', title: 'strategy-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'strategy-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'strategy-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'strategy-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'strategy-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'}]
-					},
-					{
-						type: 'collection',
-						content: [{img: '/static/images/content/ban5.jpg', title: 'collection-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'}, {img: '/static/images/content/ban5.jpg', title: 'collection-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'collection-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'collection-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'collection-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'},{img: '/static/images/content/ban5.jpg', title: 'collection-这是最新的资讯', article: '一次次与冠军失之交臂的UZI，让很多人担心他心灰意冷会选择退役', time: '2017-05-23 21:00:00', read: '208.0万阅'}]
-					}
-				]
+				imgs: ['/static/images/content/ban1.jpg', '/static/images/content/ban2.jpg', '/static/images/content/ban3.jpg', '/static/images/content/ban4.jpg', '/static/images/content/ban5.jpg']
 			}
 		},
 
@@ -117,15 +91,16 @@
 		},
 
 		updated() {
-			if(this.offset < 0) {
-				let content = this.cache.content;
-				let navga = this.cache.navga;
-				let list = content.querySelectorAll('.item');
-				let elem = list[list.length-1].getBoundingClientRect();
-				let nav = navga.getBoundingClientRect();
-				this.maxOffset += elem.bottom - nav.top;
-				console.log(this.maxOffset)
-			}
+			// if(this.offset < 0) {
+			// 	let content = this.cache.content;
+			// 	let navga = this.cache.navga;
+			// 	let list = content.querySelectorAll('.item');
+			// 	let elem = list[list.length-1].getBoundingClientRect();
+			// 	let nav = navga.getBoundingClientRect();
+			// 	this.maxOffset += elem.bottom - nav.top;
+			// 	console.log(this.maxOffset)
+			// }
+			this.calcMaxOffset();
 
 			// 多做一次是为了防止卡顿导致的位移不到位的情况，原因还在待查
 			this.$velocity(this.cache.slideContentWrap, {translateX: this.slideOffset + 'px'}, {duration: 0});
@@ -136,6 +111,14 @@
 				return this.list;
 			},
 
+			contents() {
+				return this.$store.state.content.contents;
+			},
+
+			curType() {
+				return this.navBar[this.$store.state.content.navIndex].type;
+			},
+
 			initOffset() {
 				this.slideOffset = this.$store.state.content.navIndex * -this.cache['contentWidth'] || 0;
 				return this.$store.state.content.navIndex * -this.cache['contentWidth'];
@@ -143,6 +126,42 @@
 		},
 
 		methods: {
+			calcMaxOffset() {
+				console.log('updated: calcMaxOffset');
+				let content = this.cache['content'];
+				let navga = this.cache['navga'];
+				let wraps = content.querySelectorAll('.slide-content');
+				let list = wraps[this.$store.state.content.navIndex].querySelectorAll('.item');
+	 			if(list && list.length > 0) {
+					let elem = list[list.length-1].getBoundingClientRect();
+					let nav = navga.getBoundingClientRect();
+					this.maxOffset = elem.bottom - nav.top + Math.abs(this.offset);
+	 			}
+			},
+
+			pollUpdate(context, type, interval, delay) {
+				let cur = +new Date();
+				let prev = context.cache.prev || cur;
+				clearTimeout(context.pollTimer);
+				if(cur - prev >= delay) {
+					context.$store.dispatch(CONTENT_ITEMS_UPDATE_ACTION, {type});
+					context.cache.prev = cur;
+				} else {
+					context.pollTimer = setTimeout(() => {
+						context.$store.dispatch(CONTENT_ITEMS_UPDATE_ACTION, {type});
+					}, interval);
+				}
+			},
+
+			updateItems() {
+				clearTimeout(this.pollTimer);
+
+				this.pollTimer = setTimeout(() => {
+					this.$store.dispatch(CONTENT_ITEMS_UPDATE_ACTION, {type: this.curType});
+				}, 1500);
+
+			},
+
 			contentTouchStart(e) {
 				this.startPoint = {x: e.touches[0].pageX, y: e.touches[0].pageY};
 				this.isScroll = true;
@@ -194,13 +213,8 @@
 							content.style.transform = 'translate3d(0, ' + (0-this.maxOffset) + 'px, 0)';
 							this.isScroll = false;
 							// 用于防止多次触发导致偏移差变大
-							clearTimeout(this.pollTimer);
-							// this.pollTimer = setTimeout(() => {
-							// 	if(this.list.length < 16) {
-							// 		this.list = this.list.concat([{text: '文本'},{text: '文本'}]);
-							// 	}
-							// 	this.isScroll = true;
-							// }, 2000);
+							// this.pollUpdate(this, this.curType, 2000, 2000);
+							this.updateItems();
 						} else {
 							content.style.transform = 'translate3d(0, ' + this.offset + 'px, 0)';
 						}
@@ -230,7 +244,7 @@
 					this.contentSlideEnd(e);
 					return;
 				}
-				
+
 				this.isScroll = false;
 				let loadingOffsetHeight = this.cache.loadingOffsetHeight;
 				if(this.offset > 0) {
@@ -272,6 +286,8 @@
 
 			contentSlideMove(e) {
 				if(this.isSlide) {
+					// this.pollUpdate(this, this.curType, 1000, 3000);
+					clearTimeout(this.pollTimer);
 					let curPoint = {x: e.touches[0].pageX, y: e.touches[0].pageY};
 					this.slideOffset += curPoint.x - this.slidePoint.x;
 					if(this.slideOffset > 0) {
@@ -302,9 +318,13 @@
 						complete: function() {
 							if(self.offset != 0) {
 								self.cache.content.style.transform = 'translate3d(0, ' +(-self.cache.carouselWrapOffsetHeight/2) + 'px, 0)';
+								self.offset = -self.cache.carouselWrapOffsetHeight/2;
 							} else {
 								self.cache.content.style.transform = 'translate3d(0, 0, 0)';
+								self.offset = 0;
 							}
+
+						//	self.calcMaxOffset();
 
 							// clearTimeout(self.slideTimer);
 							// this.slideTimer = setTimeout(function() {
