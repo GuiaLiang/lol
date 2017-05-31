@@ -1,8 +1,23 @@
-import {CONTENT_NAVBAR, CONTENT_NAVBAR_ACTION, CONTENT_NAVBAR_CHANGE, CONTENT_NAVBAR_CHANGE_ACTION, CONTENT_ITEMS_UPDATE, CONTENT_ITEMS_UPDATE_ACTION} from '../mutation-types'
+import {CONTENT_NAVBAR, CONTENT_NAVBAR_ACTION, CONTENT_NAVBAR_CHANGE, CONTENT_NAVBAR_CHANGE_ACTION, CONTENT_ITEMS_UPDATE, CONTENT_ITEMS_UPDATE_ACTION, CONTENT_TAB_CHANGE, CONTENT_TAB_CHANGE_ACTION} from '../mutation-types'
 
 const state = {
 	navBar: [],
 	navIndex: 0,
+	tabIndex: 0,
+	tabArr: [
+		{
+			uncheck: '/static/images/tab/tab_news.png', checked: '/static/images/tab/tab_news_checked.png', text: '资讯'
+		}, 
+		{
+			uncheck: '/static/images/tab/tab_friend.png', checked: '/static/images/tab/tab_friend_checked.png', text: '好友'
+		},
+		{
+			uncheck: '/static/images/tab/tab_discovery.png', checked: '/static/images/tab/tab_discovery_checked.png', text: '发现'
+		},
+		{
+			uncheck: '/static/images/tab/tab_me.png', checked: '/static/images/tab/tab_me_checked', text: '我'
+		}
+	],
 	contents: [
 		{
 			type: 'lastest',
@@ -38,6 +53,10 @@ const mutations = {
 
 	[CONTENT_NAVBAR_CHANGE](state, data) {
 		state.navIndex = data;
+	},
+
+	[CONTENT_TAB_CHANGE](state, data) {
+		state.tabIndex = data;
 	},
 
 	[CONTENT_ITEMS_UPDATE](state, data) {
@@ -90,6 +109,10 @@ const actions = {
 
 	[CONTENT_ITEMS_UPDATE_ACTION]({commit}, data) {
 		commit(CONTENT_ITEMS_UPDATE, data);
+	},
+
+	[CONTENT_TAB_CHANGE_ACTION]({commit}, data) {
+		commit(CONTENT_TAB_CHANGE, data);
 	}
 };
 

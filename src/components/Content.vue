@@ -27,7 +27,13 @@
 			<!-- <router-view></router-view> -->
 		</div>
 
-		<div class="navga" ref="navga"></div>
+		<div class="navga" ref="navga">
+			<div class="tag" v-for="(val, i) in tabs">
+				<img v-show="i === curTabIndex" :src="val.checked" alt="tab图标">
+				<img v-show="i !== curTabIndex" :src="val.uncheck" alt="tab图标">
+				<span class="text" :class="{curtab: i === curTabIndex}">{{val.text}}</span>
+			</div>
+		</div>
 	</div>
 </template>
 
@@ -35,7 +41,7 @@
 	import Carousel from '@/components/Carousel';
 	import Navbar from '@/components/Navbar';
 	import Items from '@/components/Items';
-	import {CONTENT_NAVBAR_CHANGE_ACTION, CONTENT_ITEMS_UPDATE_ACTION} from '@/store/mutation-types'
+	import {CONTENT_NAVBAR_CHANGE_ACTION, CONTENT_ITEMS_UPDATE_ACTION, CONTENT_TAB_CHANGE_ACTION} from '@/store/mutation-types'
 
 	export default {
 		name: 'Content',
@@ -113,6 +119,14 @@
 
 			contents() {
 				return this.$store.state.content.contents;
+			},
+
+			tabs() {
+				return this.$store.state.content.tabArr;
+			},
+
+			curTabIndex() {
+				return this.$store.state.content.tabIndex;
 			},
 
 			curType() {
@@ -452,10 +466,45 @@
 		.navga {
 			position: fixed;
 			left: 0;
-			bottom: 0;
+			bottom: -1px;
 			width: 100%;
 			height: 1.6rem;
-			background-color: green;
+			line-height: 0;
+			background-color: #f3f3f3;
+
+			.tag {
+				display: inline-block;
+				height: 100%;
+				width: 25%;
+				box-sizing: border-box;
+				position: relative;
+
+				img {
+					width: 0.72rem;
+					height: 0.72rem;
+					position: absolute;
+				    top: 50%;
+				    left: 50%;
+				    transform: translate(-50%,-75%);
+				}
+
+				.text {
+					color: #000;
+					font-size: 28px;
+					height: 0.72rem;
+					line-height: 0.72rem;
+					display: inline-block;
+					text-align: center;
+					position: absolute;
+				    bottom: 25%;
+				    left: 50%;
+				    transform: translate(-50%,50%);
+
+					&.curtab {
+						color: #d8b868;
+					}
+				}
+			}
 		}
 	}
 
