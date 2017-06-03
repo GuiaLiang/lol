@@ -6,17 +6,17 @@ const state = {
 	tabIndex: 0,
 	tabArr: [
 		{
-			uncheck: '/static/images/tab/tab_news.png', checked: '/static/images/tab/tab_news_checked.png', text: '资讯'
+			uncheck: '/static/images/tab/tab_news.png', checked: '/static/images/tab/tab_news_checked.png', text: '资讯', type: 'news'
 		}, 
 		{
-			uncheck: '/static/images/tab/tab_friend.png', checked: '/static/images/tab/tab_friend_checked.png', text: '好友'
+			uncheck: '/static/images/tab/tab_friend.png', checked: '/static/images/tab/tab_friend_checked.png', text: '好友', type: 'friends'
 		},
 		{
-			uncheck: '/static/images/tab/tab_discovery.png', checked: '/static/images/tab/tab_discovery_checked.png', text: '发现'
+			uncheck: '/static/images/tab/tab_discovery.png', checked: '/static/images/tab/tab_discovery_checked.png', text: '发现', type: 'discovery'
 		},
 		{
 			uncheck: '/static/images/tab/tab_me.png', checked: '/static/images/tab/tab_me_checked', text: '我'
-		}
+, type: 'me'		}
 	],
 	contents: [
 		{

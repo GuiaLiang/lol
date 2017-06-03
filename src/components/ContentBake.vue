@@ -23,6 +23,16 @@
 					<!-- <div>{{Object.keys(this)}}</div> -->
 				</div>
 			</div>
+				<!-- <div class="item" v-for="(val, i) in list">{{val.text}}-{{i}}</div> -->
+			<!-- <router-view></router-view> -->
+		</div>
+
+		<div class="navga" ref="navga">
+			<div class="tag" v-for="(val, i) in tabs">
+				<img v-show="i === curTabIndex" :src="val.checked" alt="tab图标">
+				<img v-show="i !== curTabIndex" :src="val.uncheck" alt="tab图标">
+				<span class="text" :class="{curtab: i === curTabIndex}">{{val.text}}</span>
+			</div>
 		</div>
 	</div>
 </template>
@@ -62,8 +72,8 @@
 
 		mounted() {
 			let content = this.$refs.content;
-			// let navga = this.$refs.navga;
-			let navga = document.querySelector('.navga');
+			let navga = this.$refs.navga;
+			// let navga = document.querySelector('.navga');
 			let carouselWrap = this.$refs.carouselWrap;
 			let loading = this.$refs.loading;
 			let userInfoWrap = this.$refs.userInfoWrap;
@@ -110,6 +120,14 @@
 
 			contents() {
 				return this.$store.state.content.contents;
+			},
+
+			tabs() {
+				return this.$store.state.content.tabArr;
+			},
+
+			curTabIndex() {
+				return this.$store.state.content.tabIndex;
 			},
 
 			curType() {
@@ -420,6 +438,50 @@
 			z-index: 10;
 			width: 100%;
 			height: 4.4rem;
+		}
+
+		.navga {
+			position: fixed;
+			left: 0;
+			bottom: -1px;
+			width: 100%;
+			height: 1.6rem;
+			line-height: 0;
+			background-color: #f3f3f3;
+
+			.tag {
+				display: inline-block;
+				height: 100%;
+				width: 25%;
+				box-sizing: border-box;
+				position: relative;
+
+				img {
+					width: 0.72rem;
+					height: 0.72rem;
+					position: absolute;
+				    top: 50%;
+				    left: 50%;
+				    transform: translate(-50%,-75%);
+				}
+
+				.text {
+					color: #000;
+					font-size: 28px;
+					height: 0.72rem;
+					line-height: 0.72rem;
+					display: inline-block;
+					text-align: center;
+					position: absolute;
+				    bottom: 25%;
+				    left: 50%;
+				    transform: translate(-50%,50%);
+
+					&.curtab {
+						color: #d8b868;
+					}
+				}
+			}
 		}
 	}
 
