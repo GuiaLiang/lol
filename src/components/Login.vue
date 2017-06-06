@@ -20,7 +20,7 @@
 				this.$store.dispatch(LOADING_STATUS_ACTION, {status: 'show'});
 				setTimeout(() => {
 					this.$store.dispatch(LOADING_STATUS_ACTION, {status: 'hidden'});
-					this.$router.push('/index');
+					this.$router.push('/content/news');
 				}, 3000);
 			}
 		}
