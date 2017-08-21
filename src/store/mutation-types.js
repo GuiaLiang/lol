@@ -1,3 +1,4 @@
+// 用以记录相关的action常量
 export const LOADING_STATUS_CHANGE = 'LOADING_STATUS_CHANGE';
 export const LOADING_STATUS_ACTION = 'LOADING_STATUS_ACTION';
 

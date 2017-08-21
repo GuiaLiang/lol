@@ -1,7 +1,17 @@
 import {CONTENT_FRIEND, CONTENT_FRIEND_ACTION} from '../mutation-types'
 
 const state = {
-	app: [],
+	app: [{type: '我的好友', onlineNum: 0, data: [{ avater: '/static/images/content/avater.png', name: '王尼玛', nickname: '张全蛋', sex: 'boy', isOnline: false },
+		{ avater: '/static/images/content/avater.png', name: '王尼玛', nickname: '张全蛋', sex: 'boy', isOnline: true },
+		{ avater: '/static/images/content/avater.png', name: '王尼玛', nickname: '张全蛋', sex: 'girl', isOnline: false },
+		{ avater: '/static/images/content/avater.png', name: '王尼玛', nickname: '张全蛋', sex: 'boy', isOnline: false },
+		{ avater: '/static/images/content/avater.png', name: '王尼玛', nickname: '张全蛋', sex: 'girl', isOnline: false }
+	]}, {type: '最佳损友', onlineNum: 0, data: [{ avater: '/static/images/content/avater.png', name: '王尼玛', nickname: '张全蛋', sex: 'boy', isOnline: false },
+		{ avater: '/static/images/content/avater.png', name: '王尼玛', nickname: '张全蛋', sex: 'boy', isOnline: false },
+		{ avater: '/static/images/content/avater.png', name: '王尼玛', nickname: '张全蛋', sex: 'girl', isOnline: false },
+		{ avater: '/static/images/content/avater.png', name: '王尼玛', nickname: '张全蛋', sex: 'boy', isOnline: false },
+		{ avater: '/static/images/content/avater.png', name: '王尼玛', nickname: '张全蛋', sex: 'girl', isOnline: false }
+	]}],
 	game: [{type: '我的好友', onlineNum: 0, data: [{ avater: '/static/images/content/avater.png', name: '王尼玛', nickname: '张全蛋', sex: 'boy', isOnline: false },
 		{ avater: '/static/images/content/avater.png', name: '王尼玛', nickname: '张全蛋', sex: 'boy', isOnline: true },
 		{ avater: '/static/images/content/avater.png', name: '王尼玛', nickname: '张全蛋', sex: 'girl', isOnline: false },

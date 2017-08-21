@@ -12,7 +12,7 @@
 			</div>
 		</div>
 
-		<div class="content-wrap" ref="contentWrap" @touchstart="scrollStart">
+		<div class="content-wrap" ref="contentWrap" @touchstart="scrollStart" @touchmove="scrollMove" @touchend="scrollEnd">
 			<div class="item friend-wrap">
 				<div class="search-wrap">
 					<span class="text">搜索你的好友</span>
@@ -21,22 +21,45 @@
 					<span class="text">好友动态</span>
 				</div>
 
-				<div class="app-friend-wrap" data-key="app" @touchend="changeSubContentStatus">
+				<div class="app-friend-wrap" data-key="app" @touchend="changeSubContentStatus" ref="appFriendWrap">
 					<span class="text friend-hidden">掌盟好友</span>
 				</div>
-				<div class="app-friend-content">
-					<div class="sub-content" v-for="(val, i) in appFriends">
+				<div class="app-friend-content" ref="appFriendContent" v-show="appSubShow">
+					<!-- <div class="sub-content" v-for="(val, i) in appFriends">
 						<span class="text friend-hidden">{{val.type}}</span>
 						<div class="friend-item-wrap">
 							<div class="friend-item" v-for="(f, index) in val.data"></div>
 						</div>
+					</div> -->
+					<div class="sub-content" key="sub-content-{{i}}" v-for="(val, i) in appFriends">
+						<div class="text-wrap" @touchend.stop="changeSubContentChildrenStatus">
+							<span class="text friend-hidden">{{val.type}}</span>
+							<span class="online-wrap">{{val.onlineNum}} / {{val.data.length}}</span>
+						</div>
+						<div class="friend-item-wrap" :style="{display: 'none'}">
+							<div class="friend-item" v-for="(f, index) in val.data">
+								<div class="item-wrap avater-wrap">
+									<img :src="f.avater" alt="avater" class="avater">
+								</div>
+								<div class="item-wrap info">
+									<div class="name">
+										<span class="name-text" :class="{boy: f.sex==='boy', girl: f.sex==='girl'}">{{f.name}}</span>
+									</div>
+									<div class="nickname">{{f.nickname}}</div>
+								</div>
+								<div class="item-wrap oper">
+									<div class="chat-oper">聊天</div>
+									<div class="status" :class="{online: f.isOnline, offline: !f.isOnline}">{{onlineText(f.isOnline)}}</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 
-				<div class="game-friend-wrap" data-key="game" @touchend="changeSubContentStatus">
+				<div class="game-friend-wrap" ref="gameFriendWrap" data-key="game" @touchend="changeSubContentStatus">
 					<span class="text friend-hidden">游戏好友</span>
 				</div>
-				<div class="game-friend-content" v-show="gameSubShow">
+				<div class="game-friend-content" ref="gameFriendContent" v-show="gameSubShow">
 					<div class="sub-content" key="sub-content-{{i}}" v-for="(val, i) in gameFriends">
 						<div class="text-wrap" @touchend.stop="changeSubContentChildrenStatus">
 							<span class="text friend-hidden">{{val.type}}</span>
@@ -75,13 +98,49 @@
 			let navga = document.querySelector('.navga');
 			let friendContainer = this.$refs.friendContainer;
 			let headerWrap = this.$refs.headerWrap;
+			let headerWrapHeight = headerWrap.offsetHeight;
+			this.cache.headerWrapHeight = headerWrapHeight;
 			let contentWrap = this.$refs.contentWrap;
+			this.cache.contentWrap = contentWrap;
 			let navgaHeight = navga.offsetHeight;
 			let height = friendContainer.offsetHeight;
 			let width = friendContainer.offsetWidth;
 			this.cache.wrapWidth = width;
 			friendContainer.style.height = height - navgaHeight + 'px';
-			contentWrap.style.height = height - navgaHeight - headerWrap.offsetHeight + 'px';
+			contentWrap.style.height = height - navgaHeight - headerWrapHeight + 'px';
+
+			// 获取好友分类的dom节点缓存
+			let gameFriendContent = document.querySelector('.game-friend-content');
+			this.cache.gameFriendWrapH = this.$refs.gameFriendWrap.offsetHeight;
+			this.cache.textWraps = gameFriendContent.querySelectorAll('div.sub-content div.text-wrap .text');
+
+			this.cache.friendItemWraps = gameFriendContent.querySelectorAll('div.friend-item-wrap');
+
+			// 获取app好友
+			let appFriendContent = document.querySelector('.app-friend-content');
+			this.cache.appTextWraps = appFriendContent.querySelectorAll('div.sub-content div.text-wrap .text');
+
+			this.cache.appFriendItemWraps = appFriendContent.querySelectorAll('div.friend-item-wrap');
+
+			let appFriendWrap = this.$refs.appFriendWrap;
+			this.cache.appFriendWrapH = appFriendWrap.offsetHeight;
+			this.cache.initOffset = height - navgaHeight - headerWrapHeight - (appFriendWrap.getBoundingClientRect()['top'] - headerWrapHeight);
+
+			// this.cache.subContentWraps = document.querySelectorAll('.sub-content .text-wrap');
+		},
+
+		updated() {
+			// // 获取好友分类的dom节点缓存
+			// let gameFriendContent = document.querySelector('.game-friend-content');
+			// this.cache.textWraps = gameFriendContent.querySelectorAll('div.sub-content div.text-wrap .text');
+
+			// this.cache.friendItemWraps = gameFriendContent.querySelectorAll('div.friend-item-wrap');
+			this.computeOffset();
+
+			if(!this.cache.subContentWraps) {
+				this.cache.subContentWraps = document.querySelectorAll('.sub-content .text-wrap');
+			}
+
 		},
 
 		computed: {
@@ -95,6 +154,19 @@
 		},
 
 		methods: {
+			computeOffset() {
+				let gameFriendContent = this.$refs.gameFriendContent;
+				let appFriendContent = this.$refs.appFriendContent;
+				let curOffset = this.cache.appFriendWrapH + this.cache.gameFriendWrapH + gameFriendContent.offsetHeight + appFriendContent.offsetHeight;
+				if(curOffset < this.cache.initOffset) {
+					this.maxOffset = 0;
+				} else {
+					this.maxOffset = curOffset - this.cache.initOffset;
+				}
+
+				console.log(`maxOffset: ${this.maxOffset}`)
+			},
+
 			changeTab(e) {
 				let target = e.target;
 				if(target.className.indexOf('title') > -1 && target.className.indexOf('cur') < 0) {
@@ -132,6 +204,28 @@
 					textElem.className = textElem.className.replace('hidden', 'show');
 				} else {
 					textElem.className = textElem.className.replace('show', 'hidden');
+					// 进行所有子级的显示隐藏
+					if(key === 'game') {
+						let textWraps = this.cache.textWraps;
+						for(let i = 0, len = textWraps.length; i < len; i++) {
+							textWraps[i].className = textWraps[0].className.replace('show', 'hidden');
+						}
+
+						let friendItemWraps = this.cache.friendItemWraps;
+						for(let i = 0, len = friendItemWraps.length; i < len; i++) {
+							friendItemWraps[i].style.display = "none";
+						}
+					} else {
+						let textWraps = this.cache.appTextWraps;
+						for(let i = 0, len = textWraps.length; i < len; i++) {
+							textWraps[i].className = textWraps[0].className.replace('show', 'hidden');
+						}
+
+						let friendItemWraps = this.cache.appFriendItemWraps;
+						for(let i = 0, len = friendItemWraps.length; i < len; i++) {
+							friendItemWraps[i].style.display = "none";
+						}
+					}
 				}
 
 				if(key === 'game') {
@@ -161,11 +255,13 @@
 				} else {
 					text.className = text.className.replace('show', 'hidden');
 				}
+
+				this.computeOffset();
 			},
 
 			isScrollAction() {
 				let now = +new Date();
-				if(now - this.cache.scrollStartTime <= 200 && !this.isScroll) {
+				if(now - this.cache.scrollStartTime <= 200) {
 					return false;
 				}
 
@@ -174,6 +270,50 @@
 
 			scrollStart(e) {
 				this.cache.scrollStartTime = +new Date();
+				this.isScroll = true;
+				this.cache.point = {x: e.touches[0].pageX, y: e.touches[0].pageY};
+			},
+
+			scrollMove(e) {
+				if(this.isScroll && this.maxOffset > 0) {
+					let curPoint = {x: e.touches[0].pageX, y: e.touches[0].pageY};
+					let prevPoint = this.cache.point;
+					let subContentWraps = this.cache.subContentWraps;
+					let headerWrapHeight = this.cache.headerWrapHeight;
+					console.log('headerWrapHeight:' + headerWrapHeight)
+					if(curPoint.y <= prevPoint.y && Math.abs(this.offset) <= this.maxOffset) {
+						this.offset += curPoint.y - prevPoint.y;
+						if(this.offset < 0 && Math.abs(this.offset) >= this.maxOffset) {
+							this.offset = -this.maxOffset;
+						}
+
+						for(let i = 0, len = subContentWraps.length; i < len; i++) {
+							let top = subContentWraps[i].getBoundingClientRect()['top'];
+
+							if(top <= headerWrapHeight) {
+								if(i < len-1 && subContentWraps[i+1].getBoundingClientRect()['top'] <= headerWrapHeight) {
+									continue;
+								} else {
+									console.log(`index-top: ${i}---${top}`)
+									subContentWraps[i].style.transform = 'translateY(' + (headerWrapHeight - top) + 'px)';
+									break;
+								}
+							}
+						}
+					} else {
+						this.offset += curPoint.y - prevPoint.y;
+						if(this.offset > 0) {
+							this.offset = 0;
+						}
+					}
+
+					this.cache.contentWrap.style.transform = 'translateY(' + this.offset + 'px)';
+					this.cache.point = curPoint;
+				}
+			},
+
+			scrollEnd(e) {
+				this.isScroll = false;
 			}
 		},
 
@@ -184,6 +324,8 @@
 				gameSubShow: false,
 				appSubShow: false,
 				isScroll: false,
+				maxOffset: 0,
+				offset: 0,
 				cache: {}
 			}
 		}
@@ -242,10 +384,13 @@
 			width: 100%;
 			height: 1rem;
 			background: url('../assets/images/header_bg_big.jpg')  center no-repeat / cover;
-			position: relative;
+			position: absolute;
+		    top: 0;
+			z-index: 40;
 
 			.add-oper-wrap {
 				position: absolute;
+				z-index: 30;
 				top: 108%;
 				right: 8%;
 				width: 3.2rem;
@@ -350,7 +495,7 @@
 
 		.content-wrap {
 			width: 200%;
-			overflow-y: auto;
+			// overflow-y: auto;
 
 			.item {
 				float: left;
@@ -391,7 +536,7 @@
 					height: 1.2rem;
 					background-color: #fff;
 					line-height: 1.2rem;
-					margin-top: 0.3rem;
+					margin-top: 0.4rem;
 					font-size: 30px;
 					position: relative;
 
@@ -454,22 +599,192 @@
 				}
 
 				.app-friend-content {
-					.text {
-						margin-left: 0.2rem;
-						position: relative;
-					}
+					// .text {
+					// 	margin-left: 0.2rem;
+					// 	position: relative;
+					// }
 
-					.friend-hidden {
-						&:before {
-							@extend %friendHidden;
-						}
-					}
+					// .friend-hidden {
+					// 	&:before {
+					// 		@extend %friendHidden;
+					// 	}
+					// }
 
-					.friend-show {
-						&:before {
-							@extend %friendShow;
+					// .friend-show {
+					// 	&:before {
+					// 		@extend %friendShow;
+					// 	}
+					// }
+
+					width: 100%;
+    				line-height: 1.2rem;
+    				position: relative;
+
+    				.sub-content {
+    					background-color: #fff;
+    					border-bottom: 1px solid #ddd;
+
+    					&:last-child {
+    						border-bottom: none;
+    					}
+
+						.text-wrap {
+							width: 100%;
+							height: 1.2rem;
+							position: relative;
+							background-color: #fff;
+
+							.online-wrap {
+								position: absolute;
+								right: 0.3rem;
+								font-size: 28px;
+								color: #808080;
+							}
+
+							.text {
+								margin-left: 0.4rem;
+								font-size: 28px;
+								color: #808080;
+								position: relative;
+							}
+
+							.friend-hidden {
+								&:before {
+									@extend %friendHidden;
+								}
+							}
 						}
-					}
+
+						.friend-item-wrap {
+							border-top: 1px solid #ddd;
+							background-color: #fff;
+
+							.friend-item {
+								box-sizing: border-box;
+								width: 100%;
+								height: 2rem;
+								padding: 0.2rem;
+								display: flex;
+								border-top: 1px solid #ddd;
+
+								&:first-child {
+									border-top: none;
+								}
+
+								.avater-wrap {
+									width: 1.6rem;
+									height: 1.6rem;
+									overflow: hidden;
+									border-radius: 50%;
+								}
+
+								.info {
+									flex-grow: 1;
+									padding-left: 0.4rem;
+									line-height: 0.8rem;
+
+									.boy {
+										position: relative;
+
+										&:after {
+											content: "";
+											position: absolute;
+											right: -50%;
+											top: 50%;
+											transform: translateY(-50%);
+											background: url('../assets/images/content/friend_sex_boy.png') center no-repeat / contain;
+											width: 0.3334rem;
+											height: 0.3334rem;
+										}
+									}
+
+									.girl {
+										position: relative;
+
+										&:after {
+											content: "";
+											position: absolute;
+											right: -50%;
+											top: 50%;
+											transform: translateY(-50%);
+											background: url('../assets/images/content/friend_sex_girl.png') center no-repeat / contain;
+											width: 0.3334rem;
+											height: 0.3334rem;
+										}
+									}
+
+									.nickname { 
+										position: relative;
+										text-indent: 0.5rem;
+
+										&:before {
+											content: "";
+											position: absolute;
+											width: 0.4rem;
+											height: 0.4rem;
+											left: 0;
+											top: 50%;
+											transform: translateY(-50%);
+											background: url('../assets/images/content/friend_game_role.png') center no-repeat / contain;
+										}
+									}
+								}
+
+								.oper {
+									width: 1.6rem;
+									height: 1.6rem;
+									line-height: 0.8rem;
+
+									.chat-oper {
+										box-sizing: border-box;
+										text-align: center;
+										color: #d8b868;
+										border: 2px solid #d8b868;
+										height: 0.8rem;
+									}
+
+									.status {
+										position: relative;
+										text-align: center;
+										height: 0.8rem;
+										text-indent: 0.2rem;
+									}
+
+									.offline {
+										color: #aaa;
+
+										&:before {
+											content: "";
+											position: absolute;
+											left: 0;
+											top: 50%;
+											transform: translateY(-50%);
+											width: 0.2rem;
+											height: 0.2rem;
+											border-radius: 50%;
+											background-color: #aaa;
+										}
+									}
+
+									.online {
+										color: #00a94c;
+
+										&:before {
+											content: "";
+											position: absolute;
+											left: 0;
+											top: 50%;
+											transform: translateY(-50%);
+											width: 0.2rem;
+											height: 0.2rem;
+											border-radius: 50%;
+											background-color: #00a94c;
+										}
+									}
+								}
+							}
+						}
+    				}
 				}
 
 				.game-friend-content {
@@ -488,6 +803,8 @@
 						.text-wrap {
 							width: 100%;
 							height: 1.2rem;
+							position: relative;
+							background-color: #fff;
 
 							.online-wrap {
 								position: absolute;
